@@ -54,7 +54,7 @@ class Scanner {
             case '/':
                 if (match('/')) {
                     // A comment goes until the end of the line
-                    while(peek() != '\n' && !isAtEnd()) advance();
+                    while (peek() != '\n' && !isAtEnd()) advance();
                 } else {
                     addToken(TokenType.SLASH);
                 }
@@ -66,6 +66,7 @@ class Scanner {
             case '\n':
                 line++;
                 break;
+            case '"': string(); break;
             default:
                 Lox.error(line, "Unexpected character.");
                 break;
@@ -96,5 +97,19 @@ class Scanner {
         if (source.charAt(current) != expected) return false;
         current++;
         return true;
+    }
+
+    private void string() {
+        while (peek() != '"' && !isAtEnd()) {
+            if (peek() == '\n') line++;
+            advance();
+        }
+        if (isAtEnd()) {
+            Lox.error(line, "Unterminated string.");
+            return;
+        }
+        advance();
+        String value = source.substring(start+1, current-1);
+        addToken(TokenType.STRING, value);
     }
 }
